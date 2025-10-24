@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "George Shuklin", email = "george.shuklin@gmail.com" }
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 dependencies = []
 
 [build-system]
@@ -24,4 +24,3 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
