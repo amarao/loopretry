@@ -15,22 +15,20 @@ jobs:
           - "3.10"
           - "3.11"
           - "3.12"
-    runs-on: ubuntu-24.04
-
+          - "3.13"
+          - "3.14"
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v1
-
-      - name: Install dependencies
-        run: uv pip install --system '.[dev]'
-
       - name: Run tests
-        run: python -m pytest
+        run: uv run --frozen pytest --color=yes -v tests
+
+      - name: Run typing checks
+        run: uv run --frozen mypy -v src/
