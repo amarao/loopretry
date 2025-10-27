@@ -2,8 +2,8 @@ name: Publish
 
 on:
   push:
-    tags:
-      - "*"
+    branches:
+      - master
 
 jobs:
   publish:
@@ -18,38 +18,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validate tag commit matches master HEAD
-        env:
-          MASTER_REF: ${{ github.event.repository.default_branch }}
-        run: |
-          git fetch origin "${MASTER_REF}" --depth=1
-          tag_commit="$(git rev-parse HEAD)"
-          master_commit="$(git rev-parse origin/"${MASTER_REF}")"
-          if [ "${tag_commit}" != "${master_commit}" ]; then
-              echo "::error::Tag commit ${tag_commit} does not match ${MASTER_REF} HEAD ${master_commit}"
-              exit 1
-          fi
-          echo "Tag commit matches ${MASTER_REF} HEAD ${master_commit}"
-
       - name: Install uv
         uses: astral-sh/setup-uv@v7
-
-      - name: Validate tag == pyproject version
-        env:
-          GIT_TAG: ${{ github.ref_name }}
-        run: |
-          python - <<'PY'
-          import tomllib, pathlib, os, sys
-          data = tomllib.loads(pathlib.Path("pyproject.toml").read_text("utf-8"))
-          declared = data["project"]["version"]
-          tag_version = os.environ["GIT_TAG"]
-          if declared != tag_version:
-              sys.stderr.write(
-                  f"version mismatch: pyproject={declared} git_tag={tag_version}\n"
-              )
-              sys.exit(1)
-          print(f"version ok: {declared}")
-          PY
 
       - name: Mypy
         run: uv run --frozen mypy --color src/
@@ -58,7 +28,7 @@ jobs:
         run: uv run --frozen pytest --color=yes -v tests
 
       - name: Build
-        run: uv build
+        run: uv --verbose build
 
       - name: Publish to PyPI
         run: uv publish --verbose dist/*
