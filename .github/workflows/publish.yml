@@ -8,7 +8,7 @@ on:
 jobs:
   publish:
     name: Publish
-    environment: publish
+    environment: upload
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -62,4 +62,4 @@ jobs:
 
       - name: Publish to PyPI
         run: uv publish --verbose dist/*
-        # environment 'publish', secret: UV_PUBLISH_TOKEN
+        # environment 'upload', secret: UV_PUBLISH_TOKEN
