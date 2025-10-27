@@ -1,0 +1,50 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  publish:
+    name: Publish
+    environment: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Validate tag == pyproject version
+        env:
+          GIT_TAG: ${{ github.ref_name }}
+        run: |
+          python - <<'PY'
+          import tomllib, pathlib, os, sys
+          data = tomllib.loads(pathlib.Path("pyproject.toml").read_text("utf-8"))
+          declared = data["project"]["version"]
+          tag_version = os.environ["GIT_TAG"]
+          if declared != tag_version:
+              sys.stderr.write(
+                  f"version mismatch: pyproject={declared} git_tag={tag_version}\n"
+              )
+              sys.exit(1)
+          print(f"version ok: {declared}")
+          PY
+
+      - name: Mypy
+        run: uv run --frozen mypy --color src/
+
+      - name: Tests
+        run: uv run --frozen pytest --color=yes -v tests
+
+      - name: Build
+        run: uv build
+
+      - name: Publish to PyPI
+        run: uv publish --non-interactive dist/*
+        # environment 'publish', secret: UV_PUBLISH_TOKEN
