@@ -1,7 +1,7 @@
 [project]
 name = "loopretry"
 version = "0.1.0"
-description = "Add your description here"
+description = "Retry context manager for arbitrary code blocks"
 readme = "README.md"
 authors = [
     { name = "George Shuklin", email = "george.shuklin@gmail.com" }
